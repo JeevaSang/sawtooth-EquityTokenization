@@ -1,0 +1,38 @@
+version: '3.6'
+
+services:
+# -------------=== Client / shell ===-------------
+  equity-tokenization-client:
+    container_name: equity-tokenization-client
+    build:
+      context: .
+      dockerfile: ./jsclient/Dockerfile
+    volumes:
+      - '.:/project/equity-tokenization/'
+    ports:
+      - '0.0.0.0:3000:3000'
+
+# -------------=== Transaction processor ===-------------
+  equity-tokenization-tp-0:
+    container_name: equity-tokenization-tp-0
+    build:
+        context: .
+        dockerfile: ./jsprocessor/Dockerfile
+    volumes:
+        - '.:/project/equity-tokenization/'
+    expose:
+        - 4004
+    command: node index.js tcp://validator-0:4004 -vv -C tcp://validator-0:4004
+    stop_signal: SIGKILL
+
+  equity-tokenization-tp-1:
+    container_name: equity-tokenization-tp-1
+    build:
+        context: .
+        dockerfile: ./jsprocessor/Dockerfile
+    volumes:
+        - '.:/project/equity-tokenization/'
+    expose:
+        - 4004
+    command: node index.js tcp://validator-1:4004 -vv -C tcp://validator-1:4004
+    stop_signal: SIGKILL
